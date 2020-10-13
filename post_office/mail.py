@@ -25,7 +25,7 @@ logger = setup_loghandlers("INFO")
 def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
            html_message='', context=None, scheduled_time=None, expires_at=None, headers=None,
            template=None, priority=None, render_on_delivery=False, commit=True,
-           backend=''):
+           backend='', tags=None):
     """
     Creates an email from supplied keyword arguments. If template is
     specified, email subject and content will be rendered during delivery.
@@ -53,7 +53,7 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
             scheduled_time=scheduled_time,
             expires_at=expires_at,
             headers=headers, priority=priority, status=status,
-            context=context, template=template, backend_alias=backend
+            context=context, template=template, backend_alias=backend, tags=tags
         )
 
     else:
@@ -62,11 +62,14 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
             subject = template.subject
             message = template.content
             html_message = template.html_content
+            if not tags:
+                tags = template.tags
 
         _context = Context(context or {})
         subject = Template(subject).render(_context)
         message = Template(message).render(_context)
         html_message = Template(html_message).render(_context)
+        tags = Template(tags).render(_context)
 
         email = Email(
             from_email=sender,
@@ -79,7 +82,8 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
             scheduled_time=scheduled_time,
             expires_at=expires_at,
             headers=headers, priority=priority, status=status,
-            backend_alias=backend
+            backend_alias=backend,
+            tags=tags,
         )
 
     if commit:
@@ -92,7 +96,7 @@ def send(recipients=None, sender=None, template=None, context=None, subject='',
          message='', html_message='', scheduled_time=None, expires_at=None, headers=None,
          priority=None, attachments=None, render_on_delivery=False,
          log_level=None, commit=True, cc=None, bcc=None, language='',
-         backend=''):
+         backend='', tags=None):
     try:
         recipients = parse_emails(recipients)
     except ValidationError as e:
@@ -144,7 +148,7 @@ def send(recipients=None, sender=None, template=None, context=None, subject='',
 
     email = create(sender, recipients, cc, bcc, subject, message, html_message,
                    context, scheduled_time, expires_at, headers, template, priority,
-                   render_on_delivery, commit=commit, backend=backend)
+                   render_on_delivery, commit=commit, backend=backend, tags=tags)
 
     if attachments:
         attachments = create_attachments(attachments)

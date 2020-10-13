@@ -70,6 +70,7 @@ class Email(models.Model):
     context = context_field_class(_('Context'), blank=True, null=True)
     backend_alias = models.CharField(_("Backend alias"), blank=True, default='',
                                      max_length=64)
+    tags = models.CharField(max_length=500, blank=True, null=True)
 
     class Meta:
         app_label = 'post_office'
@@ -106,12 +107,13 @@ class Email(models.Model):
             plaintext_message = engine.from_string(self.template.content).render(self.context)
             multipart_template = engine.from_string(self.template.html_content)
             html_message = multipart_template.render(self.context)
-
+            tags = engine.from_string(self.tags).render(self.context)
         else:
             subject = smart_str(self.subject)
             plaintext_message = self.message
             multipart_template = None
             html_message = self.html_message
+            tags = self.tags
 
         connection = connections[self.backend_alias or 'default']
         if isinstance(self.headers, dict) or self.expires_at:
@@ -157,6 +159,9 @@ class Email(models.Model):
                 msg.attach(attachment.name, attachment.file.read(), mimetype=attachment.mimetype or None)
             attachment.file.close()
 
+        if tags:
+            msg.tags = tags.split(';')
+        print(msg.tags)
         self._cached_email_message = msg
         return msg
 
@@ -257,6 +262,8 @@ class EmailTemplate(models.Model):
         default='', blank=True)
     default_template = models.ForeignKey('self', related_name='translated_templates',
         null=True, default=None, verbose_name=_('Default template'), on_delete=models.CASCADE)
+
+    tags = models.CharField(max_length=500, null=True, blank=True)
 
     objects = EmailTemplateManager()
 

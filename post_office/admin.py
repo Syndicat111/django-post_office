@@ -139,7 +139,7 @@ class EmailAdmin(admin.ModelAdmin):
         fieldsets = [
             (None, {
                 'fields': ['from_email', 'to', 'cc', 'bcc',
-                           'priority', ('status', 'scheduled_time')],
+                           'priority', ('status', 'scheduled_time'), "tags"],
             }),
         ]
         has_plaintext_content, has_html_content = False, False
@@ -238,7 +238,7 @@ class EmailTemplateAdminForm(forms.ModelForm):
     class Meta:
         model = EmailTemplate
         fields = ['name', 'description', 'subject', 'content', 'html_content', 'language',
-                  'default_template']
+                  'default_template', "tags"]
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get('instance')
@@ -268,7 +268,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description', 'subject')
     fieldsets = [
         (None, {
-            'fields': ('name', 'description'),
+            'fields': ('name', 'description', "tags"),
         }),
         (_("Default Content"), {
             'fields': ('subject', 'content', 'html_content'),

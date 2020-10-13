@@ -46,7 +46,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     package_data={'': ['README.rst']},
-    install_requires=['django>=2.2', 'jsonfield>=3.0'],
+    install_requires=['django>=2.2', 'jsonfield>=3.0', "django-anymail>=7.2.1"],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
